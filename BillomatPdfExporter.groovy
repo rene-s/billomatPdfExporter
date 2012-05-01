@@ -25,7 +25,7 @@ class PdfExporter {
     PdfExporter() {
         this.http = new HTTPBuilder('https://medefa.billomat.net')
         this.http.setHeaders([
-                'User-Agent': 'BilloPdfExporter 0.1',
+                'User-Agent': 'BilloPdfExporter 0.1 by rene@reneschmidt.de',
                 'X-BillomatApiKey': '4b28556815aeb8f67e3937524b73817d',
                 'Accept': 'application/json'
         ])
