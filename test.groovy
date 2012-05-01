@@ -1,4 +1,4 @@
-@Grab(group = 'org.codehaus.groovy.modules.http-builder', module = 'http-builder', version = '0.5.0-RC2')
+@Grab(group = 'org.codehaus.groovy.modules.http-builder', module = 'http-builder', version = '0.5.2')
 
 import groovyx.net.http.*
 import static groovyx.net.http.ContentType.*
