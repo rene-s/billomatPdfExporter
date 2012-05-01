@@ -4,28 +4,31 @@ import groovyx.net.http.*
 import static groovyx.net.http.ContentType.*
 import static groovyx.net.http.Method.*
 
-/**
- * Get PDF
- * @param invoiceId
- * @return
- */
-def savePdf(invoiceId) {
-    def http = new HTTPBuilder('https://medefa.billomat.net')
-    http.request(GET, JSON) {
-        uri.path = "/api/invoices/${invoiceId}/pdf"
-        uri.query = ['format': 'json']
+class PdfExporter {
 
-        headers.'User-Agent' = 'Mozilla/5.0 Ubuntu/8.10 Firefox/3.0.4'
-        headers.'X-BillomatApiKey' = '4b28556815aeb8f67e3937524b73817d'
+    /**
+     * Save PDF
+     * @param invoiceId
+     * @return
+     */
+    def savePdf(invoiceId) {
+        def http = new HTTPBuilder('https://medefa.billomat.net')
+        http.request(GET, JSON) {
+            uri.path = "/api/invoices/${invoiceId}/pdf"
+            uri.query = ['format': 'json']
 
-        response.success = { resp, json ->
-            file = new File(json.document.filename)
-            file.delete();
-            file << json.document.base64file.decodeBase64()
-        }
+            headers.'User-Agent' = 'Mozilla/5.0 Ubuntu/8.10 Firefox/3.0.4'
+            headers.'X-BillomatApiKey' = '4b28556815aeb8f67e3937524b73817d'
 
-        response.failure = { resp ->
-            println "Unexpected error: ${resp.statusLine.statusCode} : ${resp.statusLine.reasonPhrase}"
+            response.success = { resp, json ->
+                def file = new File(json.document.filename)
+                file.delete();
+                file << json.document.base64file.decodeBase64()
+            }
+
+            response.failure = { resp ->
+                println "Unexpected error: ${resp.statusLine.statusCode} : ${resp.statusLine.reasonPhrase}"
+            }
         }
     }
 }
@@ -61,8 +64,11 @@ def getInvoiceIds(status) {
     }
 }
 
+
+def billomat = new PdfExporter()
+
 def invIds = getInvoiceIds('open')
 
 invIds.each { invoiceId ->
-    savePdf(invoiceId)
+    billomat.savePdf(invoiceId)
 }

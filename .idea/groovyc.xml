@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GroovyCompilerConfiguration">
+    <excludes>
+      <file url="file:///opt/groovy/bin/groovyc" />
+    </excludes>
+  </component>
+</project>
+
