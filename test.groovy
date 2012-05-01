@@ -1,33 +1,102 @@
-import groovyx.net.http.*
 @Grab(group = 'org.codehaus.groovy.modules.http-builder', module = 'http-builder', version = '0.5.0-RC2')
+
+import biz.source_code.base64Coder.Base64Coder
+
+@Grab(group='biz.source_code', module='base64coder', version='2010-09-21')
+
+
+import groovyx.net.http.*
 import static groovyx.net.http.ContentType.*
 import static groovyx.net.http.Method.*
 
 import org.apache.commons.lang.builder.ReflectionToStringBuilder
 
-def http = new HTTPBuilder('https://medefa.billomat.net')
+/**
+ * Write file
+ * @param directory
+ * @param fileName
+ * @param extension
+ * @param infoList
+ */
+public void writeToFile(def directory, def fileName, def extension, def infoList) {
 
-// perform a GET request, expecting JSON response data
-http.request(GET, JSON) {
-    uri.path = '/api/invoices'
-    uri.query = ['status': 'open']
+}
 
-    headers.'User-Agent' = 'Mozilla/5.0 Ubuntu/8.10 Firefox/3.0.4'
-    headers.'X-BillomatApiKey' = '4b28556815aeb8f67e3937524b73817d'
-    headers.'Accept' = 'application/json'
+/**
+ * Get PDF
+ * @param invoiceId
+ * @return
+ */
+def savePdf(invoiceId) {
+    def http = new HTTPBuilder('https://medefa.billomat.net')
+    http.request(GET, JSON) {
+        uri.path = '/api/invoices/252177/pdf'
+        uri.query = ['format': 'json']
 
-    // response handler for a success response code:
-    response.success = { resp, json ->
-        println "yo: ${resp.statusLine}"
+        headers.'User-Agent' = 'Mozilla/5.0 Ubuntu/8.10 Firefox/3.0.4'
+        headers.'X-BillomatApiKey' = '4b28556815aeb8f67e3937524b73817d'
 
-        // parse the JSON response object:
-        json.invoices.invoice.each {
-            println "id: ${it.id}"
+        // response handler for a success response code:
+        response.success = { resp, json ->
+            println "yo: ${resp.statusLine}"
+
+            resp.headers.each { h ->
+                println " ${h.name} : ${h.value}"
+            }/*
+            println 'Response data: -----'
+            System.out << json.document.filename
+            println '\n--------------------'
+*/
+            f = new File(json.document.filename)
+
+            //def decoded = new String(json.document.base64file.decodeBase64())
+            def decoded = new String(Base64Coder.decodeString(json.document.base64file))
+            f.write(decoded, "ISO-8859-1");
+        }
+
+        // handler for any failure status code:
+        response.failure = { resp ->
+            println "Unexpected error: ${resp.statusLine.statusCode} : ${resp.statusLine.reasonPhrase}"
         }
     }
+}
 
-    // handler for any failure status code:
-    response.failure = { resp ->
-        println "Unexpected error: ${resp.statusLine.statusCode} : ${resp.statusLine.reasonPhrase}"
+/**
+ * Get invoice ids
+ * @param status
+ * @return
+ */
+def getInvoiceIds(status) {
+    def http = new HTTPBuilder('https://medefa.billomat.net')
+    http.request(GET, JSON) {
+        uri.path = '/api/invoices'
+        uri.query = ['status': status]
+
+        headers.'User-Agent' = 'Mozilla/5.0 Ubuntu/8.10 Firefox/3.0.4'
+        headers.'X-BillomatApiKey' = '4b28556815aeb8f67e3937524b73817d'
+        headers.'Accept' = 'application/json'
+
+        // response handler for a success response code:
+        response.success = { resp, json ->
+            // println "yo: ${resp.statusLine}"
+
+            ids = [];
+
+            // parse the JSON response object:
+            json.invoices.invoice.each {
+                ids.push(it.id)
+            }
+
+            return ids
+        }
+
+        // handler for any failure status code:
+        response.failure = { resp ->
+            println "Unexpected error: ${resp.statusLine.statusCode} : ${resp.statusLine.reasonPhrase}"
+        }
     }
 }
+
+//println getInvoiceIds('open')
+
+savePdf("249462")
