@@ -7,7 +7,7 @@ import static groovyx.net.http.Method.*
 /**
  * Exports Billomat invoices as PDF
  */
-class PdfExporter {
+class BillomatPdfExporter {
 
     /**
      * Invoice IDs
@@ -22,7 +22,7 @@ class PdfExporter {
     /**
      * Constructor
      */
-    PdfExporter() {
+    BillomatPdfExporter() {
         this.http = new HTTPBuilder('https://medefa.billomat.net')
         this.http.setHeaders([
                 'User-Agent': 'BilloPdfExporter 0.1 by rene@reneschmidt.de',
@@ -86,7 +86,7 @@ class PdfExporter {
     static main(arguments) {
         println "Starting export..."
 
-        def exporter = new PdfExporter()
+        def exporter = new BillomatPdfExporter()
         def invIds = exporter.getInvoiceIds('open')
 
         invIds.each { invoiceId ->
