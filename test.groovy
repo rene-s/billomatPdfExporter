@@ -2,8 +2,7 @@
 
 import biz.source_code.base64Coder.Base64Coder
 
-@Grab(group='biz.source_code', module='base64coder', version='2010-09-21')
-
+@Grab(group = 'biz.source_code', module = 'base64coder', version = '2010-09-21')
 
 import groovyx.net.http.*
 import static groovyx.net.http.ContentType.*
@@ -30,7 +29,7 @@ public void writeToFile(def directory, def fileName, def extension, def infoList
 def savePdf(invoiceId) {
     def http = new HTTPBuilder('https://medefa.billomat.net')
     http.request(GET, JSON) {
-        uri.path = '/api/invoices/252177/pdf'
+        uri.path = "/api/invoices/${invoiceId}/pdf"
         uri.query = ['format': 'json']
 
         headers.'User-Agent' = 'Mozilla/5.0 Ubuntu/8.10 Firefox/3.0.4'
@@ -38,20 +37,16 @@ def savePdf(invoiceId) {
 
         // response handler for a success response code:
         response.success = { resp, json ->
-            println "yo: ${resp.statusLine}"
+            /*println "yo: ${resp.statusLine}"
 
             resp.headers.each { h ->
                 println " ${h.name} : ${h.value}"
-            }/*
-            println 'Response data: -----'
-            System.out << json.document.filename
-            println '\n--------------------'
-*/
-            f = new File(json.document.filename)
+            }*/
 
-            //def decoded = new String(json.document.base64file.decodeBase64())
-            def decoded = new String(Base64Coder.decodeString(json.document.base64file))
-            f.write(decoded, "ISO-8859-1");
+            file = new File(json.document.filename)
+            def decoded = json.document.base64file.decodeBase64()
+            file.delete();
+            file << decoded
         }
 
         // handler for any failure status code:
@@ -97,6 +92,8 @@ def getInvoiceIds(status) {
     }
 }
 
-//println getInvoiceIds('open')
+def invIds = getInvoiceIds('open')
 
-savePdf("249462")
+invIds.each {
+    savePdf(it)
+}
